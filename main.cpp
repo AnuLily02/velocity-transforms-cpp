@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "cpp_math/kinematics.hpp"
 
 int main() {
@@ -18,18 +19,30 @@ int main() {
     std::cout << "  Input Velocity in Frame A:  (" << v_frameA.x << ", " << v_frameA.y << ", " << v_frameA.z << ")\n";
     std::cout << "  Transformed in Frame B:     (" << v_frameB.x << ", " << v_frameB.y << ", " << v_frameB.z << ")\n\n";
 
-    // 2. Rigid Body Velocity Example (v_p = v_origin + omega x r)
-    cpp_math::Vector3 v_origin{1.0, 0.0, 0.0};  // Linear velocity of origin
-    cpp_math::Vector3 omega{0.0, 0.0, 5.0};     // Angular velocity (rad/s) around Z
-    cpp_math::Vector3 r{0.0, 2.0, 0.0};         // Position vector to point P from origin
+    // 2. Simulate a Trajectory and Export to CSV for Python Visualization
+    std::ofstream outfile("trajectory_poses.csv");
+    if (outfile.is_open()) {
+        // Write CSV Header (step, x, y, z, roll, pitch, yaw)
+        outfile << "step,x,y,z,roll,pitch,yaw\n";
 
-    cpp_math::Vector3 v_point = cpp_math::Kinematics::rigidBodyPointVelocity(v_origin, omega, r);
+        int total_steps = 25;
+        for (int i = 0; i < total_steps; ++i) {
+            double t = static_cast<double>(i) * 0.2;
+            
+            // Generate curved path coordinates
+            double x = t;
+            double y = std::sin(t);
+            double z = 0.1 * t;
+            double yaw = std::cos(t);
 
-    std::cout << "[2] Rigid Body Point Velocity:\n";
-    std::cout << "  Origin Linear Velocity:     (" << v_origin.x << ", " << v_origin.y << ", " << v_origin.z << ")\n";
-    std::cout << "  Angular Velocity (Omega):   (" << omega.x << ", " << omega.y << ", " << omega.z << ")\n";
-    std::cout << "  Position Vector (r):        (" << r.x << ", " << r.y << ", " << r.z << ")\n";
-    std::cout << "  Resultant Point Velocity:   (" << v_point.x << ", " << v_point.y << ", " << v_point.z << ")\n";
+            // Write row data
+            outfile << i << "," << x << "," << y << "," << z << ",0.0,0.0," << yaw << "\n";
+        }
+        outfile.close();
+        std::cout << "[Info] Successfully generated and saved 'trajectory_poses.csv'!\n";
+    } else {
+        std::cerr << "[Error] Could not open trajectory_poses.csv for writing!\n";
+    }
 
     return 0;
 }
